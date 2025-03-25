@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="/static/css/navigation.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600;700&display=swap"/>
+</head>
+<body>
+    <div class="web-container">
+        <div class="navigation">
+            <div class="items">
+                <a href="/carbon_footprint" class="carbon-footprint">
+                    <div class="inner-button">Carbon Footprint</div>
+                </a>
+                <a href="/products" class="products">
+                    <div class="inner-button">Products</div>
+                    <img class="chevron-down-icon" alt="" src="/static/assets/down.png">
+                </a>
+                <a href="/" class="home">
+                    <div class="inner-button">Home</div>
+                </a>
+                <a href="/about" class="about-us">
+                    <div class="inner-button">About Us</div>
+                </a>
+                <a href="#" class="book-button">
+                    <b class="book">Book</b>
+                </a>
+                <a href="/signup_page" class="signup-button">
+                    <div class="signup">Sign Up</div>
+                    <img class="user-icon" alt="" src="/static/assets/user.png">
+                </a>
+            </div>
+            <img class="rolsa-logo" alt="Rolsa Logo" src="/static/assets/rolsalogo.png">
+            <button class="accessibility-button" aria-label="Accessibility">
+                <img class="accessibility-icon" alt="Accessibility Icon" src="/static/assets/accessibility.png">
+            </button>
+        </div>
+
+        <div class="our-products">
+            <div class="title-and-desc">
+                <b class="our-products-title">Our Products</b>
+                <div class="our-products-desc">From residential to commercial, we have the green tech you need.</div>
+            </div>
+            <a class="product-button">
+                <img class="product-button-icon" alt="" src="/static/assets/solarpanel.png">
+                <b class="button-title">Solar panels</b>
+                <div class="button-desc">Reduce personal or business costs</div>
+            </a>
+            <a class="product-button-1">
+                <img class="product-button-icon-1" alt="" src="/static/assets/smarthouse.png">
+                <b class="button-title-1">Smart energy systems</b>
+                <div class="button-desc-1">Manage home energy and reduce your usage</div>
+            </a>
+            <a class="product-button-2">
+                <img class="product-button-icon" alt="" src="/static/assets/evcar.png">
+                <b class="button-title">EV stations</b>
+                <div class="button-desc">Charge at home or for your customers</div>
+            </a>
+        </div>
+
+        <div class="top">
+            <div class="alert"></div>
+            <div class="use-our-carbon-container">
+                <span>
+                    <span class="use-our">Use our </span>
+                    <a href="#" class="carbon-footprint-tool">carbon footprint tool</a>
+                    <span class="use-our"> to calculate your energy consumption for <i style="font-size: 24px;">free</i></span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const products_button = document.querySelector('.products');
+        const products_bar = document.querySelector('.our-products');
+
+        products_button.addEventListener('mouseenter', () => {
+            products_bar.style.display = 'flex';
+        });
+        products_button.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                if (!products_bar.matches(':hover')) {
+                    products_bar.style.display = 'none';
+                }
+            }, 200);
+        });
+        products_bar.addEventListener('mouseleave', () => {
+            products_bar.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

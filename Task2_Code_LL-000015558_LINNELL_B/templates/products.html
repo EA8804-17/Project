@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Products</title>
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.png">
+    <link rel="stylesheet" href="/static/css/products.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600;700&display=swap">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="web-container">
+        <div class="products-container">
+            <div class="products-top">
+                <b class="title">Our Products</b>
+                <div class="desc">Our wide range of green technology is available for residential and commercial usage. Solutions include solar panels, EV charging stations, and smart home energy systems.</div>
+            </div>
+            <div class="product-details">
+                <div class="product-card">
+                    <img class="product-image-icon" alt="" src="/static/assets/solar.png">
+                    <div class="product-section">
+                        <b class="prod-title">Solar Panels</b>
+                        <div class="prod-desc">High-quality solar panels for energy efficiency.</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img class="product-image-icon" alt="" src="/static/assets/ev.png">
+                    <div class="product-section">
+                        <b class="prod-title">EV Charging Stations</b>
+                        <div class="prod-desc">Convenient and eco-friendly charging solutions.</div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <img class="product-image-icon" alt="" src="/static/assets/smarthome.png">
+                    <div class="product-section">
+                        <b class="prod-title">Smart Home Energy Systems</b>
+                        <div class="prod-desc">Optimize your home’s energy usage with our systems.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="buttons-container">
+                <div class="button-details">
+                    <div class="get"><b class="detail-text">Get Consultation</b></div>
+                    <div class="view"><b class="detail-text">View Details</b></div>
+                </div>
+            </div>
+            <div class="trustpilot-container">
+                <b class="trustpilot-title">See what people think..</b>
+                <img class="trustpilot-logo-icon" alt="" src="trustpilot-logo.png">
+            </div>
+            <div class="faq-container">
+                <b class="faq-title">Frequently Asked Questions</b>
+                <div class="faq-desc">Meaningful information about the products before you consult.</div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>

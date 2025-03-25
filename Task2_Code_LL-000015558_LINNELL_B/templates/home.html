@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Home</title>
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.png">
+    <link rel="stylesheet" href="/static/css/home.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600;700&display=swap">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+
+    <div class="web-container">
+        <div class="top-container">
+            <img class="background-icon" alt="Background" src="/static/assets/background.png">
+            <div class="chargeahead">
+                <div class="contentcontainer">
+                    <b class="title">
+                        <p class="charge-ahead-with">Charge ahead with</p>
+                        <p class="charge-ahead-with">green energy</p>
+                    </b>
+                    <div class="description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</div>
+                </div>
+                <a href="/book-consultation" class="book-consultation">
+                    <b class="text">Book Consultation</b>
+                </a>
+            </div>
+            <div class="impact">
+                <div class="title1">Estimated impact</div>
+                <div class="desc">
+                    <span class="desc-txt">
+                        <span>Our customers have saved 5,000 metric tons of <b>CO₂</b> using our green energy products</span>
+                    </span>
+                </div>
+                <img class="icon" alt="Impact Icon" src="/static/assets/idea.png">
+            </div>
+        </div>
+        <div class="productscontainer">
+            <b class="products-title">Our Products</b>
+            <div class="productslist">
+                <div class="card">
+                    <img class="cardimage-icon" alt="" src="/static/assets/solar.png">
+                    <div class="carddetails">
+                        <b>Solar Panels</b>
+                        <div class="product-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <img class="cardimage-icon" alt="" src="/static/assets/ev.png">
+                    <div class="carddetails">
+                        <b>Electric vehicle (EV) stations</b>
+                        <div class="product-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <img class="cardimage-icon" alt="" src="/static/assets/smarthome.png">
+                    <div class="carddetails">
+                        <b>Smart home energy systems</b>
+                        <div class="product-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.</div>
+                    </div>
+                </div>
+            </div>
+            <a href="/book-consultation" class="moredetails">
+                <b>More Details</b>
+            </a>
+        </div>
+        <div class="services-container">
+            <div class="services-box"></div>
+            <img class="services-icon" alt="Services Icon" src="/static/assets/services.png">
+            <b class="services-title">Our Services</b>
+            <div class="services-content">
+                <div class="installation-container">
+                    <b class="container-title">Installation</b>
+                    <div class="container-description">We offer installation assistance to our customers to provide a guaranteed positive experience.</div>
+                </div>
+                <div class="installation-container">
+                    <b class="container-title">Maintenance</b>
+                    <div class="container-description">We offer maintenance and support to resolve any issues with our products. Customers are given a guarantee to receive 24/7 support.</div>
+                </div>
+            </div>
+            <div class="buttons">
+                <a class="get-consultation">
+                    <b class="button-title">Get Consultation</b>
+                </a>
+                <a class="schedule-consultation">
+                    <b style="color: black" class="button-title">Schedule Installation</b>
+                </a>
+            </div>
+        </div>
+        <div class="reviews-container">
+            <b class="reviews-title">Reviews</b>
+            <div class="reviews-list">
+                <div class="review">
+                    <div class="avatar">
+                        <img class="avatar-icon" alt="Avatar" src="/static/assets/user.png">
+                        <div class="avatar-name">Name</div>
+                        <div class="avatar-desc">Description</div>
+                    </div>
+                    <div class="review-desc">“Provided excellent maintenance and support”</div>
+                </div>
+                <div class="review">
+                    <div class="avatar">
+                        <img class="avatar-icon" alt="Avatar" src="/static/assets/user.png">
+                        <div class="avatar-name">Name</div>
+                        <div class="avatar-desc">Description</div>
+                    </div>
+                    <div class="review-desc">“Easy to contact and gave fast responses to my enquiries”</div>
+                </div>
+                <div class="review">
+                    <div class="avatar">
+                        <img class="avatar-icon" alt="Avatar" src="/static/assets/user.png">
+                        <div class="avatar-name">Name</div>
+                        <div class="avatar-desc">Description</div>
+                    </div>
+                    <div class="review-desc">
+                        “Gave insight into my energy consumption compared to green”
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>

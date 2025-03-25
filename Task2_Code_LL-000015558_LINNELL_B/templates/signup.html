@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Sign Up</title>
+    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.png">
+    <link rel="stylesheet" href="/static/css/login.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600;700&display=swap">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="web-container">
+        <div class="login-container">
+            <img class="background-bg" alt="" src="/static/assets/background.png">
+            <div class="login-background"></div>
+            <div class="top-container">
+                <b class="title">Sign Up</b>
+                <div class="desc">
+                    <span>Already a member? </span>
+                    <a href="/login_page" class="switch"><b>Login here</b></a>
+                </div>
+            </div>
+            <form action="/signup" method="POST" class="form-container">
+                <div class="email-box">
+                    <label class="email-label">Email</label>
+                    <input type="email" name="email" class="email-input" placeholder="Enter your email" required>
+                </div>
+                <div class="password-box">
+                    <label class="password-label">Password</label>
+                    <input type="password" name="password" class="password-input" placeholder="Enter your password" required>
+                </div>
+                <div class="password-box">
+                    <label class="password-label">Repeat Password</label>
+                    <input type="password" name="repeat_password" class="password-input" placeholder="Repeat your password" required>
+                </div>
+
+                {% if error %}
+                    <div class="error-message">{{ error }}</div>
+                {% endif %}
+
+                <div class="submit-login">
+                    <button type="submit" class="login-button"><b>Sign Up</b></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>

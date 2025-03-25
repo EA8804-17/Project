@@ -1,0 +1,56 @@
+.web-container {
+    max-width: 2000px;
+    margin: 0 auto;
+}
+.title {
+    position: relative;
+    left: 4%;
+    font-size: 48px;
+}
+
+.trustpilot-title {
+    margin-top: 20px;
+    position: absolute;
+    left: calc(50% - 618px);
+    font-size: 48px;
+}
+
+.desc {
+    font-size: 24px;
+    color: #828282;
+    position: relative;
+    left: 4%;
+    width: 90%;
+}
+
+.faq-desc {
+    font-size: 24px;
+    color: #828282;
+}
+
+.products-top {
+    margin-top: -140px;
+    margin-bottom: 35px;
+}
+
+.products-container {
+    margin-top: 200px;
+    width: 100%;
+    height: auto;
+    text-align: left;
+    font-family: 'Open Sans', sans-serif;
+}
+.product-card {
+    text-align: left;
+    margin-right: 90px;
+}
+.product-details {
+    margin-left: 60px;
+    display: flex;
+    justify-content: center;
+}
+.get, .view {
+    background-color: #006837;
+    border-radius: 8px;
+    height: 57px;
+}
