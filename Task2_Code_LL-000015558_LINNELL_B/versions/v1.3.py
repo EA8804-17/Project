@@ -1,7 +1,12 @@
 """
     Rolsa Technologies
     24/03/2024
-    Version v1.4
+    Version v1.3
+
+    Changes - Compared to v1.2:
+    + Created and configured API for product fetching (/api/products)
+    + API endpoint fetches product data (type, desc, and image)
+    + Finalised product page
 """
 
 #   Packages and Libraries
@@ -62,7 +67,7 @@ def sign_up():
                                error="Please enter at least one uppercase, lowercase, digit, and special character")
 
     try:
-        database = sqlite3.connect("database.db")
+        database = sqlite3.connect("../database.db")
         cursor = database.cursor()
 
         # Creates database entry in customers database
@@ -109,7 +114,7 @@ def login():
     password = request.form["password"]
 
     try:
-        database = sqlite3.connect("database.db")
+        database = sqlite3.connect("../database.db")
         cursor = database.cursor()
 
         cursor.execute("SELECT * FROM customers WHERE email = ?", (email,))
@@ -152,7 +157,7 @@ def dashboard():
 #   Products API
 @app.route('/api/products', methods=['GET'])
 def get_products():
-    database = sqlite3.connect("database.db")
+    database = sqlite3.connect("../database.db")
     cursor = database.cursor()
 
     # Fetch product data including images

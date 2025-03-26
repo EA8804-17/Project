@@ -1,3 +1,6 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+}
 .web-container {
     max-width: 2000px;
     margin: 0 auto;
@@ -8,11 +11,29 @@
     font-size: 48px;
 }
 
+.trustpilot-container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    margin-top: 10px;
+    padding: 20px;
+    margin-left: 12%;
+    width: 20%;
+}
+
 .trustpilot-title {
-    margin-top: 20px;
-    position: absolute;
-    left: calc(50% - 618px);
-    font-size: 48px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: #484545;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.trustpilot-logo-icon {
+    margin-left: -10px;
+    width: 200px;
+    height: auto;
 }
 
 .desc {
@@ -23,9 +44,59 @@
     width: 90%;
 }
 
+.faq-container {
+    width: 30%;
+    padding: 15px;
+    margin-bottom: 15px;
+    margin-top: -180px;
+    margin-left: 54%;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    background-color: #fff;
+    font-family: 'Open Sans', sans-serif;
+    text-align: left;
+}
+
+.faq-title {
+    font-size: 27px;
+    font-weight: 700;
+}
+
 .faq-desc {
-    font-size: 24px;
+    font-size: 16px;
     color: #828282;
+    margin-top: 10px;
+}
+
+.question {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.question-icon {
+    width: 35px;
+    height: 35px;
+}
+
+.question-content {
+    margin-left: 15px;
+}
+
+.question-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.question-desc {
+    font-size: 14px;
+    color: #828282;
+}
+
+.faq-separator {
+    border-top: 1px solid #d9d9d9;
+    margin-top: 6px;
 }
 
 .products-top {
@@ -49,8 +120,142 @@
     display: flex;
     justify-content: center;
 }
+
+.button-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
 .get, .view {
+    background-color: #494646;
+    color: white;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    width: 93%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.view {
     background-color: #006837;
-    border-radius: 8px;
-    height: 57px;
+}
+
+.get:hover, .view:hover {
+    background-color: #006737;
+}
+
+.detail-text {
+    font-weight: bold;
+}
+
+/* Popup content for products */
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    height: 50%;
+}
+
+.popup-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    width: 60%;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.close {
+    background-color: #494646;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 600;
+    align-self: flex-end;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.close:hover {
+    background-color: #006837;
+}
+
+.popup-details {
+    display: flex;
+    align-items: flex-start;
+}
+
+#popup-image {
+    max-width: 40%;
+    height: auto;
+    margin-top: 20px;
+    margin-right: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.popup-text {
+    font-family: 'Open Sans', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+#popup-title {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#popup-description, #popup-extra {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.get-consultation {
+    background-color: #006837;
+    color: white;
+    padding: 10px 15px;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    width: 90%;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    align-self: flex-start;
+}
+
+.get-consultation:hover {
+    background-color: #004f2a;
 }

@@ -15,7 +15,7 @@ body {
     height: 264px;
     position: relative;
     background-color: #fff;
-    font-family: 'Open Sans';
+    font-family: 'Open Sans', sans-serif;
     font-size: 17px;
     color: #494646;
     text-align: left;

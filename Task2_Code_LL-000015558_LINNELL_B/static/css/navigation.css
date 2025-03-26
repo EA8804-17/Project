@@ -166,7 +166,7 @@ a {
   	text-align: left;
   	font-size: 20px;
   	color: #000;
-  	font-family: 'Open Sans';
+  	font-family: 'Open Sans', sans-serif;
 }
 button:hover, a:hover {
     opacity: 0.75;
@@ -181,7 +181,7 @@ button:hover, a:hover {
   	overflow: hidden;
 }
 .use-our, .carbon-footprint-tool {
-  	font-family: 'Open Sans';
+  	font-family: 'Open Sans', sans-serif;
 }
 .carbon-footprint-tool {
   	text-decoration: underline;
@@ -206,7 +206,7 @@ button:hover, a:hover {
     background-color: #fff;
     height: auto;
     text-align: center;
-    font-family: 'Open Sans';
+    font-family: 'Open Sans', sans-serif;
     display: none;
     justify-content: flex-start;
     gap: 30px;
