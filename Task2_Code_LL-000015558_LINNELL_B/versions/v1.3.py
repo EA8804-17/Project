@@ -50,7 +50,7 @@ def validate_password(password):
 #   Landing Home Page
 @app.route("/")
 def home():
-    return render_template("products.html")
+    return render_template("home.html")
 
 #   Sign Up Request
 @app.route("/signup", methods=["POST"])

@@ -12,6 +12,9 @@ import sqlite3
 import pandas as pd
 import bcrypt
 
+# TODO: PRODUCTS DROPDOWN > SHOW INDIVIDUAL PRODUCT DETAILS ON PRODUCT PAGE
+# TODO: FOOTER LINKS TO SERVICES SECTION ETC.
+
 #   Initialisation
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(24)
@@ -45,7 +48,7 @@ def validate_password(password):
 #   Landing Home Page
 @app.route("/")
 def home():
-    return render_template("products.html")
+    return render_template("home.html")
 
 #   Sign Up Request
 @app.route("/signup", methods=["POST"])
