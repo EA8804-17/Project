@@ -1,0 +1,152 @@
+.web-container {
+    max-width: 2000px;
+    margin: 0 auto;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+}
+
+.book-container {
+    width: 100%;
+    text-align: center;
+    color: #494646;
+}
+
+.title-container {
+    margin-left: 170px;
+    margin-top: 60px;
+    margin-bottom: 40px;
+    text-align: left;
+}
+
+.title {
+    font-size: 48px;
+    color: #000000;
+    font-weight: 700;
+}
+
+.desc {
+    font-size: 24px;
+    line-height: 1.5;
+    color: #828282;
+}
+
+.get-free-consultation {
+    background-color: #006837;
+    border-radius: 10px;
+    padding: 40px;
+    color: #fff;
+    width: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.consult-icon {
+    position: absolute;
+    top: 70px;
+    left: 100px;
+    width: 355px;
+    height: 355px;
+}
+
+.title-main {
+    font-size: 45px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    margin-left: 300px;
+}
+
+.title-desc {
+    font-size: 22px;
+    margin-bottom: 30px;
+    margin-left: 300px;
+}
+
+.form-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-left: 42%;
+    max-width: 600px;
+}
+
+.input-field {
+    width: 100%;
+}
+
+.form-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+label {
+    font-weight: 800;
+}
+
+input, select {
+    font-family: "Open Sans", "serif";
+    padding: 10px;
+    color: #757575;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    appearance: none;
+}
+
+select {
+    background-color: #fff;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #8bc148;
+}
+
+.confirm {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.confirm-button {
+    padding: 10px;
+    font-size: 25px;
+    font-weight: 700;
+    color: #000000;
+    background-color: #8BC349;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 310px;
+    width: 600px;
+    font-family: "Open Sans", "serif";
+}
+
+.confirm-button:hover {
+    background-color: #7baa3c;
+}
+
+.error-message {
+    display: block;
+    color: #ef4e4e;
+    font-size: 16px;
+    margin-top: 20px;
+    margin-left: 250px;
+    text-align: center;
+}
+
+.success-message {
+    display: block;
+    color: #4cda6a;
+    font-size: 20px;
+    margin-left: 250px;
+    margin-top: 20px;
+    text-align: center;
+}

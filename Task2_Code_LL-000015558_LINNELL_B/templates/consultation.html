@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Book Consultation</title>
+    <link rel="icon" type="image/x-icon" href="/static/assets/icons/favicon.png">
+    <link rel="stylesheet" href="/static/css/consultation.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600;700&display=swap">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="web-container">
+        <div class="book-container">
+            <div class="title-container">
+                <b class="title">Book Consultation</b>
+                <div class="desc">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor.
+                </div>
+            </div>
+            <div class="get-free-consultation">
+                <img class="consult-icon" alt="Consult Icon" src="/static/assets/icons/consulticon.png">
+                <div class="title-box">
+                    <b class="title-main">Get a free consultation</b>
+                    <div class="title-desc">Schedule a consultation below</div>
+                </div>
+
+                <form id="consultation-form" method="POST" action="/submit_consultation">
+                    <div class="form-list">
+                        <div class="form-item">
+                            <label for="fullname">Full Name</label>
+                            <input type="text" id="fullname" placeholder="Enter your full name" class="input-field">
+                        </div>
+                        <div class="form-item">
+                            <label for="product">Product Type</label>
+                            <select id="product" class="input-field">
+                                <option value="" disabled selected>Select type of product</option>
+                            </select>
+                        </div>
+                        <div class="form-item">
+                            <label for="property">Property Type</label>
+                            <select id="property" class="input-field">
+                                <option value="" disabled selected>Select type of property</option>
+                                <option value="residential">Residential</option>
+                                <option value="commercial">Commercial</option>
+                            </select>
+                        </div>
+                        <div class="form-item">
+                            <label for="postcode">Postcode</label>
+                            <input type="text" id="postcode" placeholder="Enter your postcode" class="input-field">
+                        </div>
+                        <div class="form-item">
+                            <label for="date">Schedule Date</label>
+                            <input type="date" id="date" class="input-field">
+                        </div>
+                    </div>
+                    <div class="confirm">
+                        <button class="confirm-button input-field" type="button">Confirm Consultation</button>
+                    </div>
+                </form>
+
+                <div class="success-message"></div>
+                <div class="error-message"></div>
+
+                {% if success %}
+                    <div class="success-message">{{ success }}</div>
+                {% endif %}
+
+                {% if error %}
+                    <div class="error-message">{{ error }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% include 'footer.html' %}
+
+    <script>
+        // Dynamically add to the Product Type dropdown
+        document.addEventListener("DOMContentLoaded", async () => {
+            const product_dropdown = document.getElementById("product");
+            const confirm_button = document.querySelector(".confirm-button");
+
+            try {
+                const response = await fetch("/api/products");
+                const products = {} // await response.json();
+
+                // Populate dropdown with product options
+                Object.entries(products).forEach(([product_type]) => {
+                    const option = document.createElement("option");
+                    option.value = product_type;
+                    option.textContent = product_type;
+                    product_dropdown.appendChild(option);
+                });
+
+                confirm_button.disabled = false;
+            } catch (error) {
+                console.error("Error fetching products:", error);
+
+                const error_message = document.querySelector(".error-message");
+                error_message.textContent = "Error loading products. Please try again later.";
+
+                confirm_button.disabled = true;
+            }
+        });
+
+        // Submit consultation to app
+        document.querySelector(".confirm-button").addEventListener("click", async () => {
+            const error_message = document.querySelector(".error-message")
+            const success_message = document.querySelector(".success-message")
+
+            const fullname = document.getElementById("fullname").value;
+            const product_id = document.getElementById("product").value;
+            const property_type = document.getElementById("property").value;
+            const postcode = document.getElementById("postcode").value;
+            const preferred_date = document.getElementById("date").value;
+
+            // Check if fields are empty
+            if (!fullname || !product_id || !property_type || !postcode || !preferred_date) {
+                error_message.textContent = "Please fill in all fields before submitting the consultation.";
+                return;
+            }
+
+            const consultation_data = {
+                full_name: fullname,
+                product_id: product_id,
+                property_type: property_type,
+                postcode: postcode,
+                preferred_date: preferred_date
+            }
+
+            // Submit POST request
+            try {
+                const response = await fetch("/submit_consultation", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify(consultation_data)
+                })
+
+                const result = await response.json();
+
+                if (result.success) {
+                    success_message.textContent = "Consultation submitted successfully"
+                } else {
+                    error_message.textContent = `An error occurred ${result.error}`;
+                }
+            } catch (error) {
+                console.error("Error submitting consultation", error)
+                error_message.textContent = "Failed to submit consultation"
+            }
+        });
+    </script>
+</body>
+</html>

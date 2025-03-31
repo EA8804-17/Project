@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Products</title>
-    <link rel="icon" type="image/x-icon" href="/static/assets/favicon.png">
+    <link rel="icon" type="image/x-icon" href="/static/assets/icons/favicon.png">
     <link rel="stylesheet" href="/static/css/products.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600;700&display=swap">
 </head>
@@ -14,11 +14,11 @@
         <div id="product-popup" class="popup">
             <div class="popup-inner">
                 <div class="popup-content">
+                    <h2 id="popup-title">Product Title</h2> <!-- Moved outside of popup-details -->
                     <button class="close">Close</button>
                     <div class="popup-details">
                         <img id="popup-image" src="" alt="Product Image">
                         <div class="popup-text">
-                            <h2 id="popup-title">Product Title</h2>
                             <p id="popup-description">Product details will be displayed here.</p>
                             <p id="popup-extra">Additional information about the product.</p>
                             <button class="get-consultation">Get Consultation</button>
@@ -33,51 +33,13 @@
                 <b class="title">Our Products</b>
                 <div class="desc">Our wide range of green technology is available for residential and commercial usage. Solutions include solar panels, EV charging stations, and smart home energy systems.</div>
             </div>
-            <div class="product-details">
-                <div class="product-card">
-                    <img class="product-image-icon" alt="" src="/static/assets/solarpanels.png">
-                    <div class="product-section">
-                        <b class="prod-title">Solar panels</b>
-                        <div class="prod-desc">High-quality solar panels for energy efficiency.</div>
-                        <div class="buttons-container">
-                            <div class="button-details">
-                                <div class="get"><b class="detail-text">Get Consultation</b></div>
-                                <div class="view"><b class="detail-text">View Details</b></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <img class="product-image-icon" alt="" src="/static/assets/evcharging.png">
-                    <div class="product-section">
-                        <b class="prod-title">EV charging stations</b>
-                        <div class="prod-desc">Convenient and eco-friendly charging solutions.</div>
-                        <div class="buttons-container">
-                            <div class="button-details">
-                                <div class="get"><b class="detail-text">Get Consultation</b></div>
-                                <div class="view"><b class="detail-text">View Details</b></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="product-card">
-                    <img class="product-image-icon" alt="" src="/static/assets/smarthome.png">
-                    <div class="product-section">
-                        <b class="prod-title">Smart home energy management</b>
-                        <div class="prod-desc">Optimize your home’s energy usage with our systems.</div>
-                        <div class="buttons-container">
-                            <div class="button-details">
-                                <div class="get"><b class="detail-text">Get Consultation</b></div>
-                                <div class="view"><b class="detail-text">View Details</b></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="product-details" id="product-details">
+                <!-- Product cards will be dynamically inserted here -->
             </div>
             <div class="trustpilot-container">
                 <b class="trustpilot-title">See what people think..</b>
                <a href="https://www.trustpilot.com" target="_blank">
-                    <img class="trustpilot-logo-icon" alt="Trustpilot Logo" src="/static/assets/trustpilot.png">
+                    <img class="trustpilot-logo-icon" alt="Trustpilot Logo" src="/static/assets/buttons/trustpilot.png">
                </a>
             </div>
             <div class="faq-container">
@@ -87,21 +49,21 @@
                     <div class="faq-desc">Meaningful information about the products before you consult</div>
                 </div>
                 <div class="question">
-                    <img class="question-icon" src="/static/assets/question.png" alt="">
+                    <img class="question-icon" src="/static/assets/icons/question.png" alt="">
                     <div class="question-content">
                         <b class="question-title">Lorem ipsum dolor sit amet.</b>
                         <div class="question-desc">Meaningful information about the products before you consult.</div>
                     </div>
                 </div>
                 <div class="question">
-                    <img class="question-icon" src="/static/assets/question.png" alt="">
+                    <img class="question-icon" src="/static/assets/icons/question.png" alt="">
                     <div class="question-content">
                         <b class="question-title">Lorem ipsum dolor sit amet.</b>
                         <div class="question-desc">Meaningful information about the products before you consult.</div>
                     </div>
                 </div>
                 <div class="question">
-                    <img class="question-icon" src="/static/assets/question.png" alt="">
+                    <img class="question-icon" src="/static/assets/icons/question.png" alt="">
                     <div class="question-content">
                         <b class="question-title">Lorem ipsum dolor sit amet.</b>
                         <div class="question-desc">Meaningful information about the products before you consult.</div>
@@ -116,12 +78,14 @@
         const popup_title = document.getElementById("popup-title");
         const popup_desc = document.getElementById("popup-description");
         const popup_extra = document.getElementById("popup-extra");
-        const popup_image = document.getElementById("popup-image")
+        const popup_image = document.getElementById("popup-image");
         const close = document.querySelector(".close");
+        const product_details = document.getElementById("product-details");
 
         let product_data = {};
 
-        fetch('/api/products') // Pickup API request
+        // Fetch products and generate cards
+        fetch("/api/products")
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Error with status: ${response.status}`);
@@ -130,30 +94,61 @@
             })
             .then(data => {
                 product_data = data;
+                generate_product_cards(data);
+                event_listener();
+                check_url_for_product(); // New function to check URL and trigger popup
             })
-        .catch(error => console.error("Fetch Error:", error));
+            .catch(error => console.error("Fetch Error:", error));
 
-
-        // Event listener for "View Details" buttons
-        document.querySelectorAll(".view").forEach(button => {
-            button.addEventListener("click", (event) => {
-                const product_card = event.target.closest(".product-card");
-                const title = product_card.querySelector(".prod-title").textContent.trim();
-
-                console.log("Title:", title);
-                console.log("Available keys:", Object.keys(product_data));
-
-                // Fetch the corresponding data from product_data
-                const data = product_data[title];
-
-                popup_title.textContent = title;
-                popup_desc.textContent = product_card.querySelector(".prod-desc").textContent;
-                popup_extra.textContent = data?.extra || "Failed to get info";
-                popup_image.src = data?.image || "/static/assets/question.png"; // Fall back image in case of error
-
-                popup.style.display = "flex";
+        function generate_product_cards(products) {
+            product_details.innerHTML = ''; // Clear existing cards
+            Object.entries(products).forEach(([title, info]) => {
+                const card = document.createElement("div");
+                card.className = "product-card";
+                card.innerHTML = `
+                    <img class="product-image-icon" alt="" src="${info.image || '/static/assets/icons/question.png'}">
+                    <div class="product-section">
+                        <b class="prod-title">${title}</b>
+                        <div class="prod-desc">${info.extra || 'No description available'}</div>
+                        <div class="buttons-container">
+                            <div class="button-details">
+                                <div class="get"><b class="detail-text">Get Consultation</b></div>
+                                <div class="view"><b class="detail-text">View Details</b></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                product_details.appendChild(card);
             });
-        });
+        }
+
+        function event_listener() {
+            // Event listener for "View Details" buttons
+            document.querySelectorAll(".view").forEach(button => {
+                button.addEventListener("click", (event) => {
+                    const product_card = event.target.closest(".product-card");
+                    const title = product_card.querySelector(".prod-title").textContent.trim();
+                    show_popup(title);
+                });
+            });
+        }
+
+        function show_popup(title) {
+            const data = product_data[title];
+            popup_title.textContent = title;
+            popup_desc.textContent = data?.extra || "No description available";
+            popup_extra.textContent = data?.details || "No additional info available";
+            popup_image.src = data?.image || "/static/assets/icons/question.png";
+            popup.style.display = "flex";
+        }
+
+        function check_url_for_product() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const product = urlParams.get('product');
+            if (product && product_data[product]) {
+                show_popup(product);
+            }
+        }
 
         // Close popup
         close.addEventListener("click", () => {

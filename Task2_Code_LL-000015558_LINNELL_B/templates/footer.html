@@ -8,41 +8,41 @@
 <body>
     <div class="web-container">
         <div class="footer">
-            <img class="rolsa-logo1" alt="Rolsa Logo" src="/static/assets/rolsalogo.png">
+            <img class="rolsa-logo1" alt="Rolsa Logo" src="/static/assets/logos/rolsalogo.png">
 
             <div class="footer-links">
                 <div class="link-list">
                     <a href="/" class="primary-button">Home</a>
                     <a href="/products" class="button">Products</a>
-                    <a href="/reviews" class="button">Reviews</a>
-                    <a href="/services" class="button">Our Services</a>
+                    <a href="{{ url_for('home') }}#reviews" class="button">Reviews</a>
+                    <a href="{{ url_for('home') }}#services" class="button">Our Services</a>
                 </div>
                 <div class="link-list">
                     <a href="/products" class="primary-button">Products</a>
-                    <a href="/products" class="button">Solar panels</a>
-                    <a href="/reviews" class="button">Electric vehicle charging</a>
-                    <a href="/services" class="button">Smart home energy</a>
+                    <a href="/products?product=Solar panels" class="button">Solar panels</a>
+                    <a href="/products?product=EV charging stations" class="button">Electric vehicle charging</a>
+                    <a href="/products?product=Smart home energy management" class="button">Smart home energy</a>
                 </div>
                 <div class="link-list">
                     <a href="/" class="primary-button">Other</a>
-                    <a href="/products" class="button">Contact Us</a>
-                    <a href="/reviews" class="button">About Us</a>
-                    <a href="/services" class="button">Energy Usage</a>
+                    <a href="/schedule_page" class="button">Contact Us</a>
+                    <a href="/about" class="button">About Us</a>
+                    <a href="/dashboard" class="button">Energy Usage</a>
                 </div>
             </div>
 
             <div class="social-links">
                 <a href="https://www.facebook.com" target="_blank">
-                    <img class="social-icon" alt="Facebook" src="/static/assets/facebook.png">
+                    <img class="social-icon" alt="Facebook" src="/static/assets/buttons/facebook.png">
                 </a>
                 <a href="https://www.linkedin.com" target="_blank">
-                    <img class="social-icon" alt="LinkedIn" src="/static/assets/linkedin.png">
+                    <img class="social-icon" alt="LinkedIn" src="/static/assets/buttons/linkedin.png">
                 </a>
                 <a href="https://www.youtube.com" target="_blank">
-                    <img class="social-icon" alt="YouTube" src="/static/assets/youtube.png">
+                    <img class="social-icon" alt="YouTube" src="/static/assets/buttons/youtube.png">
                 </a>
                 <a href="https://www.instagram.com" target="_blank">
-                    <img class="social-icon" alt="Instagram" src="/static/assets/instagram.png">
+                    <img class="social-icon" alt="Instagram" src="/static/assets/buttons/instagram.png">
                 </a>
             </div>
 
