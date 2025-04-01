@@ -18,7 +18,7 @@
                 <b class="title">Login</b>
                 <div class="desc">
                     <span>Not a member yet? </span>
-                    <a href="/signup_page" class="switch"><b>Sign up here</b></a>
+                    <a href="/signup-page" class="switch"><b>Sign up here</b></a>
                 </div>
             </div>
             <form action="/login" method="POST" class="form-container">
@@ -35,6 +35,11 @@
                     <span class="stay-text">Keep me logged in</span>
                 </div>
                 <a class="forgot-password">Forgot password?</a>
+
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+
                 <div class="submit-login">
                     <button type="submit" class="login-button"><b>Log In</b></button>
                 </div>

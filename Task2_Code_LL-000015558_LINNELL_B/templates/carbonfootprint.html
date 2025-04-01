@@ -99,7 +99,7 @@
     </div>
     {% include 'footer.html' %}
 
-    <div id="product-popup" class="popup">
+    <div id="popup-container" class="popup">
         <div class="popup-inner">
             <div class="popup-content">
                 <h2 id="popup-title">Reduce Your Carbon Footprint</h2>
@@ -193,7 +193,7 @@
                 return;
             }
 
-            fetch("/get_carbon", {
+            fetch("/get-carbon", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
@@ -218,11 +218,11 @@
         }
 
         function open_popup() {
-            document.getElementById('product-popup').style.display = 'flex';
+            document.getElementById('popup-container').style.display = 'flex';
         }
 
         function close_popup() {
-            document.getElementById('product-popup').style.display = 'none';
+            document.getElementById('popup-container').style.display = 'none';
         }
     </script>
 </body>

@@ -1,7 +1,19 @@
 """
     Rolsa Technologies
     31/03/2024
-    Version v4.0 - Dashboard
+    Version v3.1 - Security Improvements
+
+    Changes - Compared to v3.0:
+    + Added input sanitisation to prevent SQL/XSS injection
+    + Switched to flask_session management and a 30 day default login time period
+    + Enhanced security by fetching secret key from .env
+    + Added next_url redirect support for /login page
+        - Sends a user back to their target page if they require to be logged in
+        - e.g Schedule Consultation -> Login Page -> Schedule Consultation
+    + Added consultation server-side input validation
+    + Modified route naming conventions
+    + Begun development of dashboard
+    + Added new dependencies & libraries to improve security
 """
 
 #   Packages and Libraries
@@ -13,32 +25,6 @@ import html
 import sqlite3
 import bcrypt
 import os
-
-"""
-Dashboard Information:
-
-Default State (Pending/Initial Consultation):
-- Each consultation row in the table has a "Cancel" button.
-- No installation/maintenance buttons are shown yet.
-
-Approved State:
-- When the status updates to "Approved," the "Cancel" button is replaced (or supplemented) 
-with a "Schedule Installation" button.
-- Clicking "Schedule Installation" opens a form (e.g., a modal or new page) to set the date and details.
-
-Separate Maintenance Option:
-- Add a standalone "Schedule Maintenance" button in the consultations section 
-(next to "Schedule a Consultation" and "Past Consultations") that’s always available. 
-This makes sense because maintenance might not depend on a consultation and could apply to 
-existing installations.
-"""
-
-# TODO: CLEAN UP DASHBOARD CSS > HTML
-# TODO: TWO ACTION BUTTONS, ONE FOR SCHEDULING INSTALLATION NOT VISIBLE
-# TODO: SCHEDULE MAINTENANCE POPUP
-# TODO: SCHEDULE INSTALLATION POPUP
-# TODO: ADD MESSAGES TO DASHBOARD
-# TODO: ADD SCRIPT ASSETS TO ASSET LOG
 
 #   Initialisation
 load_dotenv()
@@ -58,14 +44,14 @@ def logged_in():
 
 
 #   Validation, Security and Authentication
-def sanitise_input(string):
+def sanitise_input(string, type="input"):
     # Sanitsation method for SQL injection and XSS prevention
     if input is None:
         return ""
 
     input_string = str(string).strip()
     if any(char in input_string for char in ["'", ";", "--"]):
-        return None
+        raise ValueError(f"{input_string} contains invalid characters")
 
     return html.escape(input_string)
 
@@ -105,12 +91,9 @@ def home():
 #   Sign Up Request
 @app.route("/signup", methods=["POST"])
 def sign_up():
-    email = sanitise_input(request.form["email"])
+    email = sanitise_input(request.form["email"], "email")
     password = request.form["password"]
     repeat_password = request.form["repeat_password"]
-
-    if email is None:
-        return render_template("signup.html", error="Invalid characters in email")
 
     if password != repeat_password:  # Checks if password fields are not the same
         return render_template("signup.html", error="Passwords don't match")
@@ -120,7 +103,7 @@ def sign_up():
                                error="Please enter at least one uppercase, lowercase, digit, and special character")
 
     try:
-        database = sqlite3.connect("database.db")
+        database = sqlite3.connect("../database.db")
         cursor = database.cursor()
 
         # Creates database entry in customers database
@@ -163,16 +146,13 @@ def sign_up():
 #   Login Request
 @app.route("/login", methods=["POST"])
 def login():
-    email = sanitise_input(request.form["email"])
+    email = sanitise_input(request.form["email"], "email")
     password = request.form["password"]
     stay_logged_in = request.form.get("stay_logged_in")
     next_url = request.form.get("next")  # Get the next URL from the form
 
-    if email is None:
-        return render_template("login.html", error="Invalid characters in email")
-
     try:
-        database = sqlite3.connect("database.db")
+        database = sqlite3.connect("../database.db")
         cursor = database.cursor()
 
         cursor.execute("SELECT * FROM customers WHERE email = ?", (email,))
@@ -227,17 +207,17 @@ def schedule_page():
 def submit_consultation():
     data = request.get_json()  # Get JSON data from the request
 
-    product_type = data.get("product_type")
-    full_name = sanitise_input(data.get("full_name"))
-    preferred_date = sanitise_input(data.get("preferred_date"))
-    postcode = sanitise_input(data.get("postcode"))
+    product_id = data.get("product_id")
+    full_name = sanitise_input(data.get("full_name"), "full_name")
+    preferred_date = sanitise_input(data.get("preferred_date"), "preferred_date")
+    postcode = sanitise_input(data.get("postcode"), "postcode")
     property_type = data.get("property_type")
     customer_email = session.get("user")
 
     if not customer_email:  # Make sure user is logged in
         return jsonify({"success": False, "error": "You must log in to continue"})
     try:
-        database = sqlite3.connect("database.db")
+        database = sqlite3.connect("../database.db")
         cursor = database.cursor()
 
         # Fetch customer_id from user session
@@ -245,7 +225,7 @@ def submit_consultation():
         customer = cursor.fetchone()
 
         # Server-side validation
-        if not product_type or not full_name or not preferred_date or not postcode or not property_type:
+        if not product_id or not full_name or not preferred_date or not postcode or not property_type:
             return jsonify({"success": False, "error": "Fields cannot be empty"})
 
         if not customer:
@@ -259,7 +239,7 @@ def submit_consultation():
         if not full_name.strip() or not any(char.isalpha() for char in full_name):
             return jsonify({"success": False, "error": "Full name must contain at least one letter, not just spaces"})
 
-        # Ensure postcode is 8 characters or fewer
+        # Ensure postcode is 8 characters or less
         if len(postcode) > 8:
             return jsonify({"success": False, "error": "Postcode must be 8 characters or less"})
 
@@ -270,14 +250,6 @@ def submit_consultation():
         if date_data <= today:
             return jsonify({"success": False, "error": "Preferred date must be after today"})
 
-        # Fetch product id from products table based on product type (str)
-        cursor.execute("SELECT id FROM products WHERE type = ?", (product_type,))
-        product = cursor.fetchone()
-
-        if not product:
-            return jsonify({"success": False, "error": "Product not found"})
-
-        product_id = product[0]
         customer_id = customer[0]
 
         # Update full_name in the customers table
@@ -300,112 +272,21 @@ def submit_consultation():
     finally:
         database.close()
 
-#   Cancel Consultation
-@app.route("/cancel-consultation", methods=["POST"])
-def cancel_consultation():
-    if "user" not in session:
-        return jsonify({"success": False, "error": "You must be logged in to continue"})
-
-    consultation_id = request.form.get("consultation_id")
-    if not consultation_id:
-        return jsonify({"success": False, "error": "Consultation id required"})
-
-    try:
-        database = sqlite3.connect("database.db")
-        cursor = database.cursor()
-
-        cursor.execute("DELETE FROM consultations WHERE id = ? AND customer_id = (SELECT id FROM customers WHERE email = ?)",
-                       (consultation_id, session["user"]))
-
-        database.commit()
-
-        return jsonify({"success": "Consultation successfully cancelled"})
-    except Exception as error:
-        return jsonify({"success": False, "error": f"An error occurred: {error}"})
-    finally:
-        database.close()
-
 
 #   Dashboard Page
 @app.route("/dashboard")
 def dashboard():
-    if "user" not in session:
-        print("No user in session, redirecting to login")
-        return render_template("login.html", error="You must be logged in to continue", next=request.url)
+    if "user" in session:
+        # Load dashboard stuff
 
-    try:
-        database = sqlite3.connect("database.db")
-        cursor = database.cursor()
-
-        # Fetch customer_id and full_name
-        cursor.execute("SELECT id, full_name FROM customers WHERE email = ?", (session["user"],))
-        customer = cursor.fetchone()
-
-        if not customer:
-            return render_template("dashboard.html", error="User not found", consultations=[])
-
-        customer_id, full_name = customer
-        user_name = full_name.strip() if full_name and full_name.strip() else "user"
-
-        # Fetch all consultations with product type
-        cursor.execute("""
-            SELECT p.type, c.preferred_date, c.property_type, c.status, c.id
-            FROM consultations c
-            JOIN products p ON c.product_id = p.id
-            WHERE c.customer_id = ?
-            ORDER BY c.preferred_date ASC
-        """, (customer_id,))
-        consultations = cursor.fetchall()
-
-        # Prepare consultation data
-        consultation_data = []
-        today = datetime.now().date()
-        next_consultation = None
-        latest_consultation = None
-
-        for row in consultations:
-            product_type, preferred_date, property_type, status, consultation_id = row
-
-            date_obj = datetime.strptime(preferred_date, "%Y-%m-%d")
-            formatted_date = date_obj.strftime("%d/%m/%Y")
-
-            consultation = {
-                "product_id": product_type,
-                "request_type": "Enquiry",
-                "property_type": property_type,
-                "date_scheduled": formatted_date,
-                "status": status,
-                "consultation_id": consultation_id,
-                "date_obj": date_obj
-            }
-            consultation_data.append(consultation)
-
-            # Next closest
-            if date_obj.date() > today and next_consultation is None:
-                next_consultation = consultation
-
-            # Latest updated
-            if latest_consultation is None or date_obj > latest_consultation["date_obj"]:
-                latest_consultation = consultation
-
-        return render_template(
-            "dashboard.html",
-            consultations=consultation_data,
-            user_name=user_name,
-            next_consultation=next_consultation,
-            latest_consultation=latest_consultation
-        )
-    except Exception as error:
-        print(f"Exception occurred: {error}")
-        return render_template("dashboard.html", error=f"An error occurred: {error}", consultations=[])
-    finally:
-        database.close()
+        return render_template("dashboard.html")
+    return render_template("login.html", error="You must be logged in to continue")
 
 
 #   Products API
 @app.route("/api/products", methods=["GET"])
 def get_products():
-    database = sqlite3.connect("database.db")
+    database = sqlite3.connect("../database.db")
     cursor = database.cursor()
 
     # Updated query to include the new details column

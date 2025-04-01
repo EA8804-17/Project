@@ -14,7 +14,7 @@
         <div id="product-popup" class="popup">
             <div class="popup-inner">
                 <div class="popup-content">
-                    <h2 id="popup-title">Product Title</h2> <!-- Moved outside of popup-details -->
+                    <h2 id="popup-title">Product Title</h2>-->
                     <button class="close">Close</button>
                     <div class="popup-details">
                         <img id="popup-image" src="" alt="Product Image">
@@ -96,12 +96,13 @@
                 product_data = data;
                 generate_product_cards(data);
                 event_listener();
-                check_url_for_product(); // New function to check URL and trigger popup
+                check_url_for_product();
             })
             .catch(error => console.error("Fetch Error:", error));
 
         function generate_product_cards(products) {
-            product_details.innerHTML = ''; // Clear existing cards
+            product_details.innerHTML = '';
+
             Object.entries(products).forEach(([title, info]) => {
                 const card = document.createElement("div");
                 card.className = "product-card";
@@ -130,6 +131,19 @@
                     const title = product_card.querySelector(".prod-title").textContent.trim();
                     show_popup(title);
                 });
+            });
+
+            document.querySelectorAll(".get").forEach(button => {
+                button.addEventListener("click", (event) => {
+                    const product_card = event.target.closest(".product-card");
+                    const title = product_card.querySelector(".prod-title").textContent.trim();
+                    window.location.href = `/schedule-page?product=${encodeURIComponent(title)}`;
+                });
+            });
+
+            document.querySelector(".get-consultation").addEventListener("click", () => {
+                const title = popup_title.textContent.trim();
+                window.location.href = `/schedule-page?product=${encodeURIComponent(title)}`;
             });
         }
 

@@ -5,20 +5,240 @@
     <title>Dashboard</title>
     <link rel="icon" type="image/x-icon" href="/static/assets/icons/favicon.png">
     <link rel="stylesheet" href="/static/css/dashboard.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap">
 </head>
 <body>
     {% include 'navbar.html' %}
 
     <div class="web-container">
-        <div class="top">
-            <b class="title1">Hello, User</b>
-            <div class="logout">
-                <b class="logout-title">Log Out</b>
+        {% if error %}
+            <div style="color: red; text-align: center; margin: 20px;">{{ error }}</div>
+        {% endif %}
+        <div class="dash-top">
+            <b class="title">Hello, {{ user_name }}</b>
+            <a href="/logout" class="logout"><b class="logout-title">Log Out</b></a>
+        </div>
+
+        <div class="tabs">
+            <div class="tab next-appointment">
+                <div class="tab-bg"></div>
+                <div class="tab-top"></div>
+                <b class="tab-title">Next Appointment</b>
+                <div class="tab-desc">
+                    {% if next_consultation %}
+                        Your next appointment is for a
+                        <a href="#" class="consultation-link" data-consultation-id="{{ next_consultation.consultation_id }}">
+                            <b class="installation">{{ next_consultation.request_type | lower }}</b>,
+                            scheduled for <b class="b">{{ next_consultation.date_scheduled }}</b>
+                        </a>
+                    {% else %}
+                        No upcoming appointments scheduled.
+                    {% endif %}
+                </div>
             </div>
+            <div class="tab energyusage">
+                <div class="tab-bg"></div>
+                <div class="tab-top"></div>
+                <b class="tab-title">Energy Usage</b>
+                <div class="tab-desc2">
+                    You used <b class="kwh">150 kWh</b> of energy today
+                </div>
+                <a class="track-button"><b class="track-title">View energy usage graph</b></a>
+            </div>
+            <div class="tab latest-activity">
+                <div class="tab-bg"></div>
+                <div class="tab-top"></div>
+                <b class="tab-title">Latest Activity</b>
+                <div class="tab-desc">
+                    {% if latest_consultation %}
+                        Your status for a
+                        <a href="#" class="consultation-link" data-consultation-id="{{ latest_consultation.consultation_id }}">
+                            <b class="installation">{{ latest_consultation.request_type | lower }}</b> for
+                            <b class="b">{{ latest_consultation.product_id }}</b>
+                        </a>
+                        has been updated to <b class="b">{{ latest_consultation.status | capitalize }}</b>
+                    {% else %}
+                        No recent activity.
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="consultations">
+            <b class="consultation-title">Your Consultations</b>
+            <div class="consultation-buttons">
+                <a class="consultation-button past"><div class="button-bg past-bg"></div><div class="button-title-a b">Past Consultations</div></a>
+                <a href="/schedule-page" class="consultation-button"><div class="button-bg"></div><div class="button-title-a">Schedule a consultation</div></a>
+                <a class="consultation-button maintenance"><div class="button-bg maintenance-bg"></div><div class="button-title-a">Schedule maintenance</div></a>
+            </div>
+        </div>
+
+        <div class="requests-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Request Type</th>
+                        <th>Property Type</th>
+                        <th>Date Scheduled</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if consultations %}
+                        {% for consultation in consultations %}
+                            <tr data-consultation-id="{{ consultation.consultation_id }}">
+                                <td>{{ consultation.product_id }}</td>
+                                <td>{{ consultation.request_type }}</td>
+                                <td>{{ consultation.property_type | capitalize }}</td>
+                                <td>{{ consultation.date_scheduled }}</td>
+                                <td class="status {{ consultation.status | lower }}">{{ consultation.status | capitalize }}</td>
+                                <td>
+                                    {% if consultation.status | lower == "pending" %}
+                                        <a href="#" class="interactive-button cancel-button" data-consultation-id="{{ consultation.consultation_id }}">
+                                            <div class="interactive-title">Cancel</div>
+                                        </a>
+                                    {% elif consultation.status | lower == "approved" %}
+                                        <a href="#" class="interactive-button" data-consultation-id="{{ consultation.consultation_id }}">
+                                            <div class="interactive-title">Schedule Installation</div>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6">No consultations scheduled yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="popup-container" class="popup">
+        <div class="popup-inner">
+            <div class="popup-header">
+                <h2 class="popup-title">Schedule Maintenance</h2>
+                <button class="close" onclick="close_popup()">Close</button>
+            </div>
+            <form id="maintenance-form" method="POST" action="/schedule-maintenance">
+                <div class="form-list">
+                    <div class="form-item">
+                        <label for="consultation">Select Consultation</label>
+                        <select id="consultation" name="consultation_id" class="input-field">
+                            <option value="" disabled selected>Select a consultation</option>
+                            <!-- Options will be populated dynamically using JS -->
+                        </select>
+                    </div>
+                    <div class="form-item">
+                        <label for="date">Schedule Date</label>
+                        <input type="date" id="date" name="schedule_date" class="input-field">
+                    </div>
+                </div>
+                <div class="confirm">
+                    <button class="confirm-button input-field" type="submit">Schedule Maintenance</button>
+                </div>
+            </form>
         </div>
     </div>
 
     {% include 'footer.html' %}
+
+    <script>
+        // Highlight consultation from activity/appointment link
+        document.querySelectorAll('.consultation-link').forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                const consultation_id = this.getAttribute('data-consultation-id');
+                const row = document.querySelector(`tr[data-consultation-id="${consultation_id}"]`);
+
+                if (row) {
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach(cell => cell.classList.add('highlight'));
+
+                    setTimeout(() => {
+                        cells.forEach(cell => cell.classList.remove('highlight'));
+                    }, 2000);
+                }
+            });
+        });
+
+        // Event listener for cancelling consultations
+        document.querySelectorAll(".cancel-button").forEach(button => {
+            button.addEventListener("click", function(event) {
+                event.preventDefault()
+
+                const consultation_id = this.getAttribute("data-consultation-id")
+                // POST request to cancel consultation
+                fetch("/cancel-consultation", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                    body: new URLSearchParams({
+                        "consultation_id": consultation_id,
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the table row with this consultation ID
+                        const row = document.querySelector(`tr[data-consultation-id="${consultation_id}"]`);
+                        if (row) {
+                            row.remove();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error("Error canceling consultation:", error);
+                });
+            })
+        })
+
+        // Schedule maintenance container
+            document.querySelectorAll('.interactive-button').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+
+                const consultation_id = this.getAttribute('data-consultation-id');
+                const consultation_status = this.closest('tr').querySelector('.status').textContent.trim().toLowerCase();
+
+                // Only show the popup if the consultation status is "approved"
+                if (consultation_status === 'pending') {
+                    open_popup(consultation_id);  // Show the popup and populate it
+                }
+            });
+        });
+
+        function open_popup(consultationId) {
+            // Open the popup
+            document.getElementById('popup-container').style.display = 'flex';
+
+            // Populate the consultation dropdown dynamically (you can add more data if needed)
+            const consultationSelect = document.getElementById('consultation');
+
+            // Assuming you have an array of consultations in JavaScript (you can dynamically populate this via Flask)
+            const consultations = [
+                { id: 1, product: "Product 1" },
+                { id: 2, product: "Product 2" },
+                { id: 3, product: "Product 3" },
+            ];
+
+            consultations.forEach(consultation => {
+                const option = document.createElement('option');
+                option.value = consultation.id;
+                option.textContent = `${consultation.product}`;
+                consultationSelect.appendChild(option);
+            });
+        }
+
+        function close_popup() {
+            document.getElementById('popup-container').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
