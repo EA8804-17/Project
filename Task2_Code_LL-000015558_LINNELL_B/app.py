@@ -33,10 +33,7 @@ This makes sense because maintenance might not depend on a consultation and coul
 existing installations.
 """
 
-# TODO: CLEAN UP DASHBOARD CSS > HTML
-# TODO: TWO ACTION BUTTONS, ONE FOR SCHEDULING INSTALLATION NOT VISIBLE
-# TODO: SCHEDULE MAINTENANCE POPUP
-# TODO: SCHEDULE INSTALLATION POPUP
+# TODO: REDUCE DUPLICATED CSS
 # TODO: ADD MESSAGES TO DASHBOARD
 # TODO: ADD SCRIPT ASSETS TO ASSET LOG
 
@@ -291,7 +288,7 @@ def submit_consultation():
         cursor.execute("""
         INSERT INTO consultations (product_id, preferred_date, postcode, property_type, status, customer_id)
         VALUES (?, ?, ?, ?, ?, ?)
-        """, (product_id, preferred_date, postcode, property_type, "pending", customer_id))
+        """, (product_id, preferred_date, postcode, property_type, "approved", customer_id))
 
         database.commit()
         return jsonify({"success": True})
@@ -305,26 +302,186 @@ def submit_consultation():
 def cancel_consultation():
     if "user" not in session:
         return jsonify({"success": False, "error": "You must be logged in to continue"})
-
     consultation_id = request.form.get("consultation_id")
     if not consultation_id:
         return jsonify({"success": False, "error": "Consultation id required"})
-
     try:
         database = sqlite3.connect("database.db")
         cursor = database.cursor()
 
-        cursor.execute("DELETE FROM consultations WHERE id = ? AND customer_id = (SELECT id FROM customers WHERE email = ?)",
+        # Delete related bookings first
+        cursor.execute("DELETE FROM bookings WHERE consultation_id = ? AND customer_id = (SELECT id FROM customers WHERE email = ?)",
                        (consultation_id, session["user"]))
 
+        # Then delete the consultation
+        cursor.execute("DELETE FROM consultations WHERE id = ? AND customer_id = (SELECT id FROM customers WHERE email = ?)",
+                       (consultation_id, session["user"]))
         database.commit()
-
         return jsonify({"success": "Consultation successfully cancelled"})
     except Exception as error:
         return jsonify({"success": False, "error": f"An error occurred: {error}"})
     finally:
         database.close()
 
+
+#   Schedule Installation
+@app.route("/schedule-installation", methods=["POST"])
+def schedule_installation():
+    if "user" not in session:
+        return jsonify({"success": False, "error": "You must be logged in to continue"})
+
+    consultation_id = request.form.get("consultation_id")
+    schedule_date = request.form.get("schedule_date")
+
+    if not consultation_id or not schedule_date:
+        return jsonify({"success": False, "error": "Consultation id and date required"})
+
+    try:
+        database = sqlite3.connect("database.db")
+        cursor = database.cursor()
+
+        # Verify the consultation exists and is approved
+        cursor.execute("""
+            SELECT status FROM consultations
+            WHERE id = ? AND customer_id = (SELECT id FROM customers WHERE email = ?)
+        """, (consultation_id, session["user"]))
+        consultation = cursor.fetchone()
+
+        if not consultation:
+            return jsonify({"success": False, "error": "Consultation not found"})
+        if consultation[0] != "approved":
+            return jsonify({"success": False, "error": "Consultation must be approved"})
+
+        # Validate schedule date
+        today = datetime.now().date()
+        date_data = datetime.strptime(schedule_date, "%Y-%m-%d").date()
+        if date_data <= today:
+            return jsonify({"success": False, "error": "Scheduled date must be after today"})
+
+        # Get customer id
+        cursor.execute("SELECT id FROM customers WHERE email = ?", (session["user"],))
+        customer_id = cursor.fetchone()[0]
+
+        # Insert into bookings table
+        cursor.execute("""
+            INSERT INTO bookings (customer_id, consultation_id, maintenance, date_booked, status)
+            VALUES (?, ?, ?, ?, ?)
+        """, (customer_id, consultation_id, False, schedule_date, "Scheduled"))
+
+        # Update the consultation status and date
+        cursor.execute("""
+            UPDATE consultations
+            SET status = ?, preferred_date = ?
+            WHERE id = ?
+        """, ("Installation Scheduled", schedule_date, consultation_id))
+
+        database.commit()
+        return jsonify({"success": True, "message": "Installation successfully scheduled"})
+    except Exception as error:
+        return jsonify({"success": False, "error": f"An error occurred: {error}"})
+    finally:
+        database.close()
+
+#   Schedule Maintenance
+@app.route("/schedule-maintenance", methods=["POST"])
+def schedule_maintenance():
+    if "user" not in session:
+        return jsonify({"success": False, "error": "You must be logged in to continue"})
+
+    consultation_id = request.form.get("consultation_id")
+    schedule_date = request.form.get("schedule_date")
+
+    if not consultation_id or not schedule_date:
+        return jsonify({"success": False, "error": "Consultation id and schedule date are required"}), 400
+
+    try:
+        database = sqlite3.connect("database.db")
+        cursor = database.cursor()
+
+        # Verify the consultation exists and belongs to the user
+        cursor.execute("""
+            SELECT id FROM consultations 
+            WHERE id = ? AND customer_id = (SELECT id FROM customers WHERE email = ?)
+        """, (consultation_id, session["user"]))
+        consultation = cursor.fetchone()
+
+        if not consultation:
+            return jsonify({"success": False, "error": "Consultation not found"})
+
+        # Validate the schedule date
+        today = datetime.now().date()
+        date_data = datetime.strptime(schedule_date, "%Y-%m-%d").date()
+        if date_data <= today:
+            return jsonify({"success": False, "error": "Schedule date must be in the future"})
+
+        # Get customer_id
+        cursor.execute("SELECT id FROM customers WHERE email = ?", (session["user"],))
+        customer_id = cursor.fetchone()[0]
+
+        # Insert into bookings table
+        cursor.execute("""
+            INSERT INTO bookings (customer_id, consultation_id, maintenance, date_booked, status)
+            VALUES (?, ?, ?, ?, ?)
+        """, (customer_id, consultation_id, True, schedule_date, "Scheduled"))
+
+        # Update the consultation status and date
+        cursor.execute("""
+            UPDATE consultations
+            SET status = ?, preferred_date = ?
+            WHERE id = ?
+        """, ("Maintenance Scheduled", schedule_date, consultation_id))
+
+        database.commit()
+        return jsonify({"success": True, "message": "Maintenance scheduled successfully"})
+    except Exception as error:
+        return jsonify({"success": False, "error": f"An error occurred: {error}"})
+    finally:
+        database.close()
+
+#   Consultations API
+@app.route("/api/consultations", methods=["GET"])
+def get_consultations():
+    if "user" not in session:
+        return render_template("login.html", error="You must be logged in to continue")
+    try:
+        database = sqlite3.connect("database.db")
+        cursor = database.cursor()
+
+        # Fetch customer id
+        cursor.execute("SELECT id FROM customers WHERE email = ?", (session["user"],))
+        customer = cursor.fetchone()
+
+        if not customer:
+            return jsonify({"success": False, "error": "Customer not found"})
+
+        customer_id = customer[0]
+
+        cursor.execute("""
+            SELECT c.id, p.type, c.preferred_date, c.status
+            FROM consultations c
+            JOIN products p ON c.product_id = p.id
+            WHERE c.customer_id = ?
+            ORDER BY c.preferred_date DESC
+        """, (customer_id,))
+        consultations = cursor.fetchall()
+
+
+        consultation_data = []
+        for row in consultations:
+            consultation = {
+                "id": row[0],
+                "product_type": row[1],
+                "date_scheduled": row[2],
+                "status": row[3],
+            }
+
+            consultation_data.append(consultation)
+
+        return jsonify({"success": True, "consultations": consultation_data})
+    except Exception as error:
+        return jsonify({"success": False, "error": f"An error occurred: {error}"})
+    finally:
+        database.close()
 
 #   Dashboard Page
 @app.route("/dashboard")
@@ -365,13 +522,19 @@ def dashboard():
 
         for row in consultations:
             product_type, preferred_date, property_type, status, consultation_id = row
-
             date_obj = datetime.strptime(preferred_date, "%Y-%m-%d")
             formatted_date = date_obj.strftime("%d/%m/%Y")
 
+            # Determine request_type based on status
+            request_type = "Enquiry"
+            if status == "Installation Scheduled":
+                request_type = "Installation"
+            elif status == "Maintenance Scheduled":
+                request_type = "Maintenance"
+
             consultation = {
                 "product_id": product_type,
-                "request_type": "Enquiry",
+                "request_type": request_type,
                 "property_type": property_type,
                 "date_scheduled": formatted_date,
                 "status": status,

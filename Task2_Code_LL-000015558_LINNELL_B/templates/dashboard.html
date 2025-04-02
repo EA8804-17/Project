@@ -54,9 +54,8 @@
                         Your status for a
                         <a href="#" class="consultation-link" data-consultation-id="{{ latest_consultation.consultation_id }}">
                             <b class="installation">{{ latest_consultation.request_type | lower }}</b> for
-                            <b class="b">{{ latest_consultation.product_id }}</b>
                         </a>
-                        has been updated to <b class="b">{{ latest_consultation.status | capitalize }}</b>
+                        has been updated to <b class="b">{{ latest_consultation.status }}</b>
                     {% else %}
                         No recent activity.
                     {% endif %}
@@ -90,18 +89,25 @@
                         {% for consultation in consultations %}
                             <tr data-consultation-id="{{ consultation.consultation_id }}">
                                 <td>{{ consultation.product_id }}</td>
-                                <td>{{ consultation.request_type }}</td>
+                                <td {% if consultation.request_type in ['Installation', 'Maintenance'] %}class="bold"{% endif %}>{{ consultation.request_type }}</td>
                                 <td>{{ consultation.property_type | capitalize }}</td>
                                 <td>{{ consultation.date_scheduled }}</td>
-                                <td class="status {{ consultation.status | lower }}">{{ consultation.status | capitalize }}</td>
-                                <td>
-                                    {% if consultation.status | lower == "pending" %}
+                                <td class="status {{ consultation.status | lower | replace(' ', '-') }}">{{ consultation.status }}</td>
+                                <td class="action-cell">
+                                    {% if consultation.status == 'approved' and consultation.request_type == 'Enquiry' %}
                                         <a href="#" class="interactive-button cancel-button" data-consultation-id="{{ consultation.consultation_id }}">
                                             <div class="interactive-title">Cancel</div>
                                         </a>
-                                    {% elif consultation.status | lower == "approved" %}
-                                        <a href="#" class="interactive-button" data-consultation-id="{{ consultation.consultation_id }}">
+                                        <a href="#" class="interactive-button schedule-install-button" data-consultation-id="{{ consultation.consultation_id }}">
                                             <div class="interactive-title">Schedule Installation</div>
+                                        </a>
+                                    {% elif consultation.status == 'Installation Scheduled' or consultation.status == 'Maintenance Scheduled' %}
+                                        <a href="#" class="interactive-button cancel-button" data-consultation-id="{{ consultation.consultation_id }}">
+                                            <div class="interactive-title">Cancel</div>
+                                        </a>
+                                    {% else %}
+                                        <a href="#" class="interactive-button cancel-button" data-consultation-id="{{ consultation.consultation_id }}">
+                                            <div class="interactive-title">Cancel</div>
                                         </a>
                                     {% endif %}
                                 </td>
@@ -117,13 +123,13 @@
         </div>
     </div>
 
-    <div id="popup-container" class="popup">
+    <div id="popup-container" class="popup" style="display: none;">
         <div class="popup-inner">
             <div class="popup-header">
-                <h2 class="popup-title">Schedule Maintenance</h2>
+                <h2 class="popup-title"></h2>
                 <button class="close" onclick="close_popup()">Close</button>
             </div>
-            <form id="maintenance-form" method="POST" action="/schedule-maintenance">
+            <form id="schedule-form" method="POST" action="">
                 <div class="form-list">
                     <div class="form-item">
                         <label for="consultation">Select Consultation</label>
@@ -138,7 +144,7 @@
                     </div>
                 </div>
                 <div class="confirm">
-                    <button class="confirm-button input-field" type="submit">Schedule Maintenance</button>
+                    <button class="confirm-button input-field" type="submit">Schedule</button>
                 </div>
             </form>
         </div>
@@ -151,18 +157,13 @@
         document.querySelectorAll('.consultation-link').forEach(link => {
             link.addEventListener('click', function(event) {
                 event.preventDefault();
-
                 const consultation_id = this.getAttribute('data-consultation-id');
                 const row = document.querySelector(`tr[data-consultation-id="${consultation_id}"]`);
-
                 if (row) {
                     row.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     const cells = row.querySelectorAll('td');
                     cells.forEach(cell => cell.classList.add('highlight'));
-
-                    setTimeout(() => {
-                        cells.forEach(cell => cell.classList.remove('highlight'));
-                    }, 2000);
+                    setTimeout(() => cells.forEach(cell => cell.classList.remove('highlight')), 2000);
                 }
             });
         });
@@ -170,70 +171,100 @@
         // Event listener for cancelling consultations
         document.querySelectorAll(".cancel-button").forEach(button => {
             button.addEventListener("click", function(event) {
-                event.preventDefault()
-
-                const consultation_id = this.getAttribute("data-consultation-id")
-                // POST request to cancel consultation
+                event.preventDefault();
+                const consultation_id = this.getAttribute("data-consultation-id");
                 fetch("/cancel-consultation", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: new URLSearchParams({
-                        "consultation_id": consultation_id,
-                    }),
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({ "consultation_id": consultation_id })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Remove the table row with this consultation ID
                         const row = document.querySelector(`tr[data-consultation-id="${consultation_id}"]`);
-                        if (row) {
-                            row.remove();
-                        }
+                        if (row) row.remove();
                     }
                 })
-                .catch(error => {
-                    console.error("Error canceling consultation:", error);
-                });
-            })
-        })
+                .catch(error => console.error("Error canceling consultation:", error));
+            });
+        });
 
-        // Schedule maintenance container
-            document.querySelectorAll('.interactive-button').forEach(button => {
+        // Event listener for interactive buttons in the table
+        document.querySelectorAll('.interactive-button').forEach(button => {
             button.addEventListener('click', function(event) {
                 event.preventDefault();
-
                 const consultation_id = this.getAttribute('data-consultation-id');
                 const consultation_status = this.closest('tr').querySelector('.status').textContent.trim().toLowerCase();
+                const isScheduleInstall = this.classList.contains('schedule-install-button');
 
-                // Only show the popup if the consultation status is "approved"
-                if (consultation_status === 'pending') {
-                    open_popup(consultation_id);  // Show the popup and populate it
+                if (isScheduleInstall) {
+                    if (consultation_status === 'approved') {
+                        open_popup(consultation_id, 'installation');
+                    } else {
+                        alert('Installation can only be scheduled for approved consultations.');
+                    }
                 }
             });
         });
 
-        function open_popup(consultationId) {
-            // Open the popup
-            document.getElementById('popup-container').style.display = 'flex';
+        // Event listener for the "Schedule Maintenance" button
+        document.querySelector('.consultation-button.maintenance').addEventListener('click', function(event) {
+            event.preventDefault();
+            open_popup(null, 'maintenance');
+        });
 
-            // Populate the consultation dropdown dynamically (you can add more data if needed)
+        function open_popup(consultation_id, type) {
+            const popup = document.getElementById('popup-container');
+            const popupTitle = popup.querySelector('.popup-title');
+            const form = popup.querySelector('#schedule-form');
             const consultationSelect = document.getElementById('consultation');
 
-            // Assuming you have an array of consultations in JavaScript (you can dynamically populate this via Flask)
-            const consultations = [
-                { id: 1, product: "Product 1" },
-                { id: 2, product: "Product 2" },
-                { id: 3, product: "Product 3" },
-            ];
+            popupTitle.textContent = type === 'maintenance' ? 'Schedule Maintenance' : 'Schedule Installation';
+            form.action = type === 'maintenance' ? '/schedule-maintenance' : '/schedule-installation';
 
-            consultations.forEach(consultation => {
-                const option = document.createElement('option');
-                option.value = consultation.id;
-                option.textContent = `${consultation.product}`;
-                consultationSelect.appendChild(option);
-            });
+            fetch('/api/consultations', {
+                method: 'GET',
+                headers: { 'Content-Type': "application/json" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    consultationSelect.innerHTML = '<option value="" disabled selected>Select a consultation</option>';
+                    data.consultations.forEach(consultation => {
+                        const dateParts = consultation.date_scheduled.split('-');
+                        const formattedDate = `${dateParts[2]}/${dateParts[1]}/${dateParts[0]}`;
+                        const status = consultation.status.charAt(0).toUpperCase() + consultation.status.slice(1);
+                        const option = document.createElement('option');
+                        option.value = consultation.id;
+                        option.textContent = `${consultation.product_type} - ${formattedDate} (${status})`;
+                        if (consultation_id && consultation.id === parseInt(consultation_id)) {
+                            option.selected = true;
+                        }
+                        consultationSelect.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => console.error('Error fetching consultations:', error));
+
+            popup.style.display = 'flex';
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        close_popup();
+                        location.reload();
+                    } else {
+                        alert(data.error);
+                    }
+                })
+                .catch(error => console.error('Error scheduling:', error));
+            }, { once: true });
         }
 
         function close_popup() {
